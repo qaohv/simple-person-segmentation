@@ -19,7 +19,7 @@ class Decoder(nn.Module):
         d = F.upsample(x, scale_factor=2, mode='bilinear')
         if e is not None:
             d = cat([d, e], 1)
-        #print(d.shape)
+
         return self.double_conv(d)
 
 
@@ -57,8 +57,8 @@ class UnetResnet34(nn.Module):
 
         self.out = nn.Sequential(
             nn.Conv2d(320, 64, kernel_size=3, padding=1),
-                nn.ReLU(inplace=True),
-                nn.Conv2d(64, 1, kernel_size=1, padding=0)
+            nn.ReLU(inplace=True),
+            nn.Conv2d(64, 1, kernel_size=1, padding=0)
         )
 
     def forward(self, x):
@@ -76,20 +76,11 @@ class UnetResnet34(nn.Module):
         d2 = self.decoder2(d3, e2)
         d1 = self.decoder1(d2)
 
-        concatenation = torch.cat([
+        concatenation = cat([
             d1,
             F.upsample(d2, scale_factor=2, mode='bilinear'),
             F.upsample(d3, scale_factor=4, mode='bilinear'),
             F.upsample(d4, scale_factor=8, mode='bilinear'),
         ], 1)
-        print(concatenation.shape)
+        
         return self.out(F.dropout2d(concatenation, p=.5))
-
-
-if __name__ == "__main__":
-    import torch
-
-    m = UnetResnet34()
-    t = torch.randn((1, 3, 320, 320))
-    out = m(t)
-    print(out.shape)

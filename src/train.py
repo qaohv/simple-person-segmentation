@@ -1,7 +1,5 @@
 import argparse
 import numpy as np
-from albumentations import HorizontalFlip, VerticalFlip, ElasticTransform, ShiftScaleRotate, RandomRotate90
-from albumentations.core.transforms_interfae import NoOp
 
 import torch
 
@@ -9,12 +7,12 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
-from src.dataset import PersonDataset
-from src.model import UnetResnet34
+from tqdm import tqdm
+
+from dataset import PersonDataset
+from model import UnetResnet34
 
 if __name__ == "__main__":
-    torch.manual_seed(42)
-
     parser = argparse.ArgumentParser()
     parser.add_argument('--train-images', type=str, help='Path to train images', required=True)
     parser.add_argument('--train-masks', type=str, help='Path to train masks', required=True)
@@ -31,23 +29,16 @@ if __name__ == "__main__":
     parser.add_argument('--rop-patience', help='ROP scheduler patience', type=int, default=6)
 
     parser.add_argument('--logdir', metavar='logdir', type=str, help='directory for tensorboard logs')
-    parser.add_argument('--logfile', type=str, help='file for script logs')
 
     args = parser.parse_args()
 
-    writer = SummaryWriter(f"{args.logdir}/{args.logfile}")
+    writer = SummaryWriter(args.logdir)
 
     # 1. Create dataset
     train = PersonDataset(
         images_path=args.train_images,
         masks_path=args.train_masks,
-        # transforms=[
-        #     NoOp(),
-        #     HorizontalFlip(p=1), # first part of augs
-        #     VerticalFlip(p=1),
-        #     ShiftScaleRotate(shift_limit=0.09, rotate_limit=25, p=1),
-        #     ElasticTransform(p=1, alpha=120, sigma=120 * 0.05, alpha_affine=120 * 0.03)
-        # ]
+        transforms=None,
     )
 
     val = PersonDataset(
@@ -59,7 +50,6 @@ if __name__ == "__main__":
     val_loader = DataLoader(val, batch_size=args.batch_size, shuffle=True, num_workers=3)
 
     device = torch.device("cuda:0")
-
     unet = UnetResnet34().to(device)
 
     # TODO: change BCE to Focal Loss
@@ -77,7 +67,7 @@ if __name__ == "__main__":
             # todo: Add IoU calculation
             train_loss = []
 
-            for i, (images, masks) in enumerate(train_loader):
+            for images, masks in tqdm(train_loader):
                 optimizer.zero_grad()
 
                 images, masks = images.to(device), masks.to(device)
@@ -94,7 +84,7 @@ if __name__ == "__main__":
 
             unet.eval()
             val_loss = []
-            for i, (images, masks) in enumerate(val_loader):
+            for images, masks in tqdm(val_loader):
                 images, masks = images.to(device), masks.to(device)
 
                 # for basic unet
@@ -113,7 +103,7 @@ if __name__ == "__main__":
             writer.add_scalar("Train loss", np.mean(train_loss), epoch)
             writer.add_scalar("Valid loss", np.mean(val_loss), epoch)
 
-            print('Epoch {0} finished! train loss: {1:.5f}, val loss: {3:.5f}'.format(epoch,
+            print('Epoch {0} finished! train loss: {1:.5f}, val loss: {2:.5f}'.format(epoch,
                                                                                       np.mean(train_loss),
                                                                                       np.mean(val_loss)))
             # if epoch > 49:
