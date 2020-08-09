@@ -88,7 +88,6 @@ if __name__ == "__main__":
 
                 images, masks = images.to(device), masks.to(device)
                 prediction = unet(images)
-                prediction = torch.sigmoid(prediction)
 
                 predicted_mask = prediction.squeeze(1)
                 masks = masks.squeeze(1)
@@ -102,17 +101,14 @@ if __name__ == "__main__":
             val_loss, val_predictions, val_masks = [], [], []
             for images, masks in tqdm(val_loader):
                 images, masks = images.to(device), masks.to(device)
-
-                # for basic unet
                 prediction = unet(images)
-                prediction = torch.sigmoid(prediction)
 
                 predicted_mask = prediction.squeeze(1)
                 masks = masks.squeeze(1)
                 loss = criterion(predicted_mask, masks)  # batch loss
 
                 val_loss.append(loss.item())
-
+                prediction = torch.sigmoid(prediction)
                 val_predictions.append(predicted_mask.detach().cpu().numpy())
                 val_masks.append(masks.detach().cpu().numpy())
 
