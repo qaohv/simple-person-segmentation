@@ -73,64 +73,61 @@ if __name__ == "__main__":
     criterion = FocalLoss2d()
 
     optimizer = torch.optim.SGD(unet.parameters(), lr=args.lr, momentum=args.momentum, weight_decay=args.weight_decay)
-    scheduler = ReduceLROnPlateau(optimizer, 'min',
+    scheduler = ReduceLROnPlateau(optimizer, 'max',
                                   factor=args.rop_reduce_factor,
                                   patience=args.rop_patience, verbose=True)
     early_stopping = EarlyStopping(args.early_stopping_patience, mode='max')
-    try:
-        for epoch in range(args.epochs):
-            # train
-            unet.train()
-            train_loss = []
 
-            for images, masks in tqdm(train_loader):
-                optimizer.zero_grad()
+    for epoch in range(args.epochs):
+        unet.train()
+        train_loss = []
 
-                images, masks = images.to(device), masks.to(device)
-                prediction = unet(images)
+        for images, masks in tqdm(train_loader):
+            optimizer.zero_grad()
 
-                predicted_mask = prediction.squeeze(1)
-                masks = masks.squeeze(1)
-                loss = criterion(predicted_mask, masks)
-                train_loss.append(loss.item())  # epoch loss
+            images, masks = images.to(device), masks.to(device)
+            prediction = unet(images)
 
-                loss.backward()
-                optimizer.step()
+            predicted_mask = prediction.squeeze(1)
+            masks = masks.squeeze(1)
+            loss = criterion(predicted_mask, masks)
+            train_loss.append(loss.item())
 
-            unet.eval()
-            val_loss, val_predictions, val_masks = [], [], []
-            for images, masks in tqdm(val_loader):
-                images, masks = images.to(device), masks.to(device)
-                prediction = unet(images)
+            loss.backward()
+            optimizer.step()
 
-                predicted_mask = prediction.squeeze(1)
-                masks = masks.squeeze(1)
-                loss = criterion(predicted_mask, masks)  # batch loss
+        unet.eval()
+        val_loss, val_predictions, val_masks = [], [], []
+        for images, masks in tqdm(val_loader):
+            images, masks = images.to(device), masks.to(device)
+            prediction = unet(images)
 
-                val_loss.append(loss.item())
-                prediction = torch.sigmoid(prediction)
-                val_predictions.append(predicted_mask.detach().cpu().numpy())
-                val_masks.append(masks.detach().cpu().numpy())
+            predicted_mask = prediction.squeeze(1)
+            masks = masks.squeeze(1)
+            loss = criterion(predicted_mask, masks)  # batch loss
 
-            # calculate validation iou score for
-            iou_score, _ = calculate_iou_score(val_masks, val_predictions)
-            scheduler.step(iou_score)
+            val_loss.append(loss.item())
 
-            writer.add_scalar("Train loss", np.mean(train_loss), epoch)
-            writer.add_scalar("Valid loss", np.mean(val_loss), epoch)
-            writer.add_scalar("Valid loss", iou_score, epoch)
-            print('Epoch {0} finished! train loss: {1:.5f}, '
-                  'val loss: {2:.5f}, val iou score: {3:.5f}'.format(epoch, np.mean(train_loss),
-                                                                     np.mean(val_loss),
-                                                                     iou_score))
-            if epoch > 10:
-                torch.save(unet.state_dict(),
-                           "epoch:{}_train-loss:{:.4f}_val-loss:{:.4f}_val-iou:{:.4f}.pth".format(epoch,
-                                                                                                  np.mean(train_loss),
-                                                                                                  np.mean(val_loss),
-                                                                                                  iou_score))
-            if early_stopping.early_stop:
-                break
+            predicted_mask = torch.sigmoid(predicted_mask)
+            val_predictions.append(predicted_mask.detach().cpu().numpy())
+            val_masks.append(masks.detach().cpu().numpy())
 
-    except KeyboardInterrupt:
-        torch.save(unet.state_dict(), "checkpoint.pth")
+        # calculate validation iou score for
+        iou_score, _ = calculate_iou_score(np.concatenate(val_masks, 0), np.concatenate(val_predictions, 0))
+        scheduler.step(iou_score)
+
+        writer.add_scalar("Train loss", np.mean(train_loss), epoch)
+        writer.add_scalar("Valid loss", np.mean(val_loss), epoch)
+        writer.add_scalar("Valid loss", iou_score, epoch)
+        print('Epoch {0} finished! train loss: {1:.5f}, '
+              'val loss: {2:.5f}, val iou score: {3:.5f}'.format(epoch, np.mean(train_loss),
+                                                                 np.mean(val_loss),
+                                                                 iou_score))
+        if epoch > 10:
+            torch.save(unet.state_dict(),
+                       "epoch:{}_train-loss:{:.4f}_val-loss:{:.4f}_val-iou:{:.4f}.pth".format(epoch,
+                                                                                              np.mean(train_loss),
+                                                                                              np.mean(val_loss),
+                                                                                              iou_score))
+        if early_stopping.early_stop:
+            break

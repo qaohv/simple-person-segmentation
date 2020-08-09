@@ -6,10 +6,9 @@ import torch
 from torch.utils.data import Dataset
 from torchvision.transforms import Normalize
 
+from constants import PAD_WIDTH, PAD_HEIGHT
 from utils import pad
 
-ORIGINAL_HEIGHT = PAD_HEIGHT = 320
-ORIGINAL_WIDTH, PAD_WIDTH = 240, 320
 
 
 class PersonDataset(Dataset):

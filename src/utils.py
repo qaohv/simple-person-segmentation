@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
-from dataset import ORIGINAL_HEIGHT, PAD_HEIGHT, ORIGINAL_WIDTH, PAD_WIDTH
+
+from constants import ORIGINAL_WIDTH, ORIGINAL_HEIGHT, PAD_WIDTH, PAD_HEIGHT
 
 
 #  https://github.com/albu/albumentations/blob/master/albumentations/augmentations/functional.py
@@ -71,5 +72,6 @@ def calculate_iou_score(targets, predictions):
         binary_prediction = (cropped_predictions > threshold).astype(np.uint8)
         iou_scores.append(iou_numpy(cropped_targets, binary_prediction))
 
-    best_score, best_thr_idx = np.max(iou_scores)
-    return max(iou_scores), thresholds[best_thr_idx]
+    best_score = max(iou_scores)
+    best_thr_idx = iou_scores.index(best_score)
+    return best_score, thresholds[best_thr_idx]
