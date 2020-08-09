@@ -1,4 +1,6 @@
 import cv2
+import numpy as np
+from dataset import ORIGINAL_HEIGHT, PAD_HEIGHT, ORIGINAL_WIDTH, PAD_WIDTH
 
 
 #  https://github.com/albu/albumentations/blob/master/albumentations/augmentations/functional.py
@@ -47,3 +49,27 @@ def center_crop(img, crop_height, crop_width):
     x2 = x1 + crop_width
     img = img[y1:y2, x1:x2]
     return img
+
+
+def iou_numpy(target, prediction):
+    intersection = np.logical_and(target, prediction)
+    union = np.logical_or(target, prediction)
+    iou_score = np.sum(intersection) / np.sum(union)
+
+    return iou_score
+
+
+def calculate_iou_score(targets, predictions):
+    cropped_predictions, cropped_targets = [], []
+    for pred, mask in zip(predictions, targets):
+        cropped_predictions.append(center_crop(pred.reshape(PAD_HEIGHT, PAD_WIDTH), ORIGINAL_HEIGHT, ORIGINAL_WIDTH))
+        cropped_targets.append(center_crop(mask.reshape(PAD_HEIGHT, PAD_WIDTH), ORIGINAL_HEIGHT, ORIGINAL_WIDTH))
+
+    iou_scores = []
+    thresholds = np.linspace(0, 1, 11)
+    for threshold in thresholds:
+        binary_prediction = (cropped_predictions > threshold).astype(np.uint8)
+        iou_scores.append(iou_numpy(cropped_targets, binary_prediction))
+
+    best_score, best_thr_idx = np.max(iou_scores)
+    return max(iou_scores), thresholds[best_thr_idx]

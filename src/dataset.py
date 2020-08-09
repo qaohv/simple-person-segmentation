@@ -8,8 +8,8 @@ from torchvision.transforms import Normalize
 
 from utils import pad
 
-PAD_WIDTH = 320
-PAD_HEIGHT = 320
+ORIGINAL_HEIGHT = PAD_HEIGHT = 320
+ORIGINAL_WIDTH, PAD_WIDTH = 240, 320
 
 
 class PersonDataset(Dataset):
@@ -41,8 +41,8 @@ class PersonDataset(Dataset):
                 augmented = self.transforms(image=image, mask=mask)
                 image, mask = augmented["image"], augmented["mask"]
 
-            mask = pad(mask, 320, 320)
-            image = pad(image, 320, 320)
+            mask = pad(mask, PAD_HEIGHT, PAD_WIDTH)
+            image = pad(image, PAD_HEIGHT, PAD_WIDTH)
 
             mask = torch.from_numpy(mask[:, :, 0:1] // 255).float().permute([2, 0, 1])
             image = self.normalize(torch.from_numpy(image / 255).float().permute([2, 0, 1]))
