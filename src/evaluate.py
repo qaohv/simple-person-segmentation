@@ -19,6 +19,8 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    torch.manual_seed(42)
+
     dataset = PersonDataset(
         images_path=args.images,
         masks_path=args.masks,
