@@ -33,8 +33,8 @@ python src/train.py --train-images /data/picksart_persons/train/images/ \
 
 ## Eval model:
 ```
-python src/evaluate --images /data/picksart_persons/val/images/ \
-                    --val-masks /data/picksart_persons/val/masks/ \ 
-                    --model /path/to/model.pth \
-                    --batch-size 4
+python src/evaluate.py --images /data/picksart_persons/val/images/ \
+                       --masks /data/picksart_persons/val/masks/ \
+                       --model /path/to/model.pth \
+                       --batch-size 4
 ```

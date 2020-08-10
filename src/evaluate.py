@@ -20,8 +20,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     dataset = PersonDataset(
-        images_path=args.val_images,
-        masks_path=args.val_masks,
+        images_path=args.images,
+        masks_path=args.masks,
     )
     dataloader = DataLoader(dataset, batch_size=args.batch_size, shuffle=False, num_workers=3)
 
@@ -32,16 +32,16 @@ if __name__ == "__main__":
     unet.to(device)
 
     unet.eval()
-    predictions, masks = [], []
-    for image, mask in tqdm(dataloader):
-        prediction = unet(image.to(device))
+    all_predictions, all_masks = [], []
+    for images, masks in tqdm(dataloader):
+        prediction = unet(images.to(device))
 
         prediction = torch.sigmoid(prediction)
         predicted_mask = prediction.squeeze(1)
         masks = masks.squeeze(1)
 
-        predictions.append(predicted_mask.detach().cpu().numpy())
-        masks.append(masks.numpy())
+        all_predictions.append(predicted_mask.detach().cpu().numpy())
+        all_masks.append(masks.numpy())
 
-    iou_score, threshold = calculate_iou_score(np.concatenate(masks, 0), np.concatenate(predictions, 0))
+    iou_score, threshold = calculate_iou_score(np.concatenate(all_masks, 0), np.concatenate(all_predictions, 0))
     print(f"IoU score: {iou_score}, threshold: {threshold}")
