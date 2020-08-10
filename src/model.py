@@ -40,25 +40,23 @@ class UnetResnet34(nn.Module):
         self.encoder5 = backbone.layer4
 
         self.bottleneck = nn.Sequential(
-            nn.Conv2d(512, 1024, kernel_size=3, padding=1),
-            nn.BatchNorm2d(1024),
+            nn.Conv2d(512, 512, kernel_size=3, padding=1),
+            nn.BatchNorm2d(512),
             nn.ReLU(inplace=True),
-            nn.Conv2d(1024, 1024, kernel_size=3, padding=1),
-            nn.BatchNorm2d(1024),
+            nn.Conv2d(512, 256, kernel_size=3, padding=1),
+            nn.BatchNorm2d(256),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=2, stride=2),
         )
 
-        self.decoder5 = DecoderBlock(1024 + 512, 1024, 512)
-        self.decoder4 = DecoderBlock(512 + 256, 512, 256)
-        self.decoder3 = DecoderBlock(256 + 128, 256, 128)
-        self.decoder2 = DecoderBlock(128 + 64, 128, 64)
+        self.decoder5 = DecoderBlock(256 + 512, 512, 256)
+        self.decoder4 = DecoderBlock(256 + 256, 256, 128)
+        self.decoder3 = DecoderBlock(128 + 128, 128, 64)
+        self.decoder2 = DecoderBlock(64 + 64, 128, 64)
         self.decoder1 = DecoderBlock(64, 64, 64)
 
         self.out = nn.Sequential(
-            nn.Conv2d(1024, 512, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(512, 64, kernel_size=3, padding=1),
+            nn.Conv2d(576, 64, kernel_size=3, padding=1),
             nn.ReLU(inplace=True),
             nn.Conv2d(64, 1, kernel_size=1, padding=0)
         )
