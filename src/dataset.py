@@ -10,7 +10,6 @@ from constants import PAD_WIDTH, PAD_HEIGHT
 from utils import pad
 
 
-
 class PersonDataset(Dataset):
     def __init__(self, images_path, masks_path=None, transforms=None):
         super().__init__()

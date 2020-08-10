@@ -1,5 +1,10 @@
 # simple-person-segmentation
 
+## Preinstalls:
+
+1. Nvidia driver
+2. Docker
+3. Nvidia docker (nvidia-cuda-toolkit)
 
 ## Build docker:
 ```
@@ -11,7 +16,7 @@ docker build -t person-segmentation .
 docker run -it --rm --gpus=all --shm-size 8G -v `pwd`/data:/data -v `pwd`/logs:/logs person-segmentation
 ```
 
-## Run test:
+## Run train:
 ```
 python src/train.py --train-images /data/picksart_persons/train/images/ \
                     --train-masks /data/picksart_persons/train/masks/ \

@@ -1,5 +1,6 @@
 # https://github.com/AdilZouitine/early-stopping-pytorch
 import numpy as np
+import torch
 
 
 class EarlyStopping:
@@ -23,10 +24,9 @@ class EarlyStopping:
             self.best_score = np.NINF
 
         else:
-            raise ValueError(
-                "mode only takes as value in input 'min' or 'max'")
+            raise ValueError("mode only takes as value in input 'min' or 'max'")
 
-    def __call__(self, score):
+    def __call__(self, score, model, filename):
         """Determines if the score is the best and saves the model if so.
            Also manages early stopping.
         Arguments:
@@ -34,13 +34,21 @@ class EarlyStopping:
         """
         if np.isinf(self.best_score):
             self.best_score = score
+            self.save_checkpoint(model, filename)
 
         elif self.criterion(score, self.best_score + self.delta):
             self.best_score = score
             self.counter = 0
+            self.save_checkpoint(model, filename)
+
         else:
             self.counter += 1
             print(f'EarlyStopping counter: {self.counter} out of {self.patience}')
             if self.counter >= self.patience:
                 self.early_stop = True
                 print('Early stopping counter is exceeded')
+
+    @staticmethod
+    def save_checkpoint(model, filename):
+        """Saves the model when the score satisfies the criterion."""
+        torch.save(model.state_dict(), filename)
