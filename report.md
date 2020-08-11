@@ -30,7 +30,7 @@
 но и ряде других ([Carvana Image Masking](https://www.kaggle.com/c/carvana-image-masking-challenge), [Dstl Satellite Imagery Feature Detection](https://www.kaggle.com/c/dstl-satellite-imagery-feature-detection/),
 [TGS Salt Identification Challenge](https://www.kaggle.com/c/tgs-salt-identification-challenge)).
 
-Unet состоит из двух частей: encoder и decoder. 
+Архитектура Unet состоит из двух частей: encoder и decoder. 
 Encoder сворачивает изображение в вектор, а decoder восстанавливает из вектора маску, которая по размеру равна входному изображению.    
 
 К Unet были применены следующие модификации:
@@ -60,11 +60,10 @@ Encoder сворачивает изображение в вектор, а decode
  [remove small objects](https://scikit-image.org/docs/dev/api/skimage.morphology.html#skimage.morphology.remove_small_objects)
 
 
-## Speed test
+## Сравнение скорости инференса моделей
 В таблице 2 приведено сравнение скорости inference pytorch модели и ее оптимизированной trt версии.    
-Замеры проводились на GPU RTX2080, CPU: Core i5-6400, bs 1, fp32. 
+Замеры проводились на GPU RTX2080, CPU: Core i5-6400, bs 1, fp32.    
 Таблица 2.
-
 
 |  	|  mean time (sec)	| std	|
 |:-:|:-:|:-:|
