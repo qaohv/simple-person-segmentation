@@ -1,4 +1,4 @@
-FROM nvcr.io/nvidia/pytorch:19.11-py3
+FROM nvcr.io/nvidia/pytorch:20.03-py3
 
 RUN conda install -c anaconda pip -y
 

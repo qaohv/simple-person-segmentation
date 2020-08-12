@@ -67,5 +67,5 @@ Encoder сворачивает изображение в вектор, а decode
 
 |  	|  mean time (sec)	| std	|
 |:-:|:-:|:-:|
-| Pytorch model 	| 0.02462 	| 0.04144 	|
-| TRT model 	    | TBD       | TBD 	|
+| Pytorch model 	| 0.02462 	| 0.04144 |
+| TRT model 	    | 0.01762   | 0.00011 |

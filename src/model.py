@@ -16,7 +16,7 @@ class DecoderBlock(nn.Module):
         )
 
     def forward(self, x, e=None):
-        d = F.upsample(x, scale_factor=2, mode='bilinear')
+        d = F.interpolate(x, scale_factor=2, mode='bilinear')
         if e is not None:
             d = cat([d, e], 1)
 
@@ -78,10 +78,10 @@ class UnetResnet34(nn.Module):
 
         concatenation = cat([
             d1,
-            F.upsample(d2, scale_factor=2, mode='bilinear'),
-            F.upsample(d3, scale_factor=4, mode='bilinear'),
-            F.upsample(d4, scale_factor=8, mode='bilinear'),
-            F.upsample(d5, scale_factor=16, mode='bilinear')
+            F.interpolate(d2, scale_factor=2, mode='bilinear'),
+            F.interpolate(d3, scale_factor=4, mode='bilinear'),
+            F.interpolate(d4, scale_factor=8, mode='bilinear'),
+            F.interpolate(d5, scale_factor=16, mode='bilinear')
         ], 1)
 
-        return self.out(F.dropout2d(concatenation, p=.5))
+        return self.out(F.dropout2d(concatenation, p=.5, training=self.training))

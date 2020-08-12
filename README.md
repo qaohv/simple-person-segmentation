@@ -35,6 +35,23 @@ python src/train.py --train-images /data/picksart_persons/train/images/ \
 ```
 python src/evaluate.py --images /data/picksart_persons/val/images/ \
                        --masks /data/picksart_persons/val/masks/ \
-                       --model /path/to/model.pth \
+                       --model /logs/exp1/epoch:27_train-loss:0.0148_val-loss:0.0161_val-iou:0.9495.pth \
                        --batch-size 4
+```
+
+## Convert pytorch model to tensorrt:
+```
+python src/convert_to_tensorrt.py --input-model /path/to/pytorch-model.pth \
+                                  --output-model /path/to/engine.plan
+```
+
+## Run speed benchmark:
+```
+python src/speed_benchmark.py --torch-model /path/to/model.pth \
+                              --trt-engine /path/to/ending.plan
+```
+
+### Check onnx convertable to trt
+```
+trtexec --onnx=/path/to/model.onnx --verbose=True --workspace=9000 --shapes=input:1x3x320x320
 ```
