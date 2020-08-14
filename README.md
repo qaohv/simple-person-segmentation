@@ -35,7 +35,7 @@ python src/train.py --train-images /data/picksart_persons/train/images/ \
 ```
 python src/evaluate.py --images /data/picksart_persons/val/images/ \
                        --masks /data/picksart_persons/val/masks/ \
-                       --model /logs/exp1/epoch:27_train-loss:0.0148_val-loss:0.0161_val-iou:0.9495.pth \
+                       --model /path/to/model.pth \
                        --batch-size 4
 ```
 
