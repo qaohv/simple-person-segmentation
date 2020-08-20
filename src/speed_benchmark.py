@@ -21,7 +21,7 @@ INPUT_SHAPE = (1, 3, 320, 320)
 def allocate_buffers(engine):
     host_input = cuda.pagelocked_empty(trt.volume(engine.get_binding_shape(0)), trt.nptype(engine.get_binding_dtype(0)))
     host_output = cuda.pagelocked_empty(trt.volume(engine.get_binding_shape(1)),
-                                        trt.nptype(engine.get_binding_dtype(0)))
+                                        trt.nptype(engine.get_binding_dtype(1)))
 
     device_input = cuda.mem_alloc(host_input.nbytes)
     device_output = cuda.mem_alloc(host_output.nbytes)
