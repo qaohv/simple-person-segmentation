@@ -11,6 +11,9 @@ COPY src /opt/app/src
 WORKDIR /opt/app/
 ENV PYTHONPATH=/opt/app
 
+RUN git clone https://github.com/NVIDIA/apex && \
+    pip install -v --no-cache-dir --global-option="--cpp_ext" --global-option="--cuda_ext" ./apex
+
 RUN mkdir /data
 VOLUME /data
 
